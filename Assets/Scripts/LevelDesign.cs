@@ -7,7 +7,7 @@ public class LevelDisplay : MonoBehaviour
     [SerializeField] TextMeshProUGUI levelText; //  UI text
     [SerializeField] float displayDuration = 2f; // How long the text stays visible
 
-    private static bool uiExists = false; // Prevent duplicate canavas
+    private static bool uiExists = false; // Prevent duplicate canvas
 
     void Awake()
     {
@@ -39,27 +39,41 @@ public class LevelDisplay : MonoBehaviour
 
     void OnLevelLoaded(Scene scene, LoadSceneMode mode)
     {
+        if (scene.buildIndex == 0)
+        {
+            // Back at the main menu: remove the persistent level HUD entirely
+            // so no timer or level text carries over onto the menu.
+            uiExists = false;
+            Destroy(gameObject);
+            return;
+        }
+
         UpdateLevelText(); // Update text when scene changes
     }
 
     void UpdateLevelText()
     {
-        int gameLevel = SceneManager.GetActiveScene().buildIndex; // Get scene index
-        int displayedLevel = gameLevel; // Adjust if Main Menu is Scene 0
+        if (levelText == null) return;
 
-        if (gameLevel == 0) // If Main Menu is the first scene
+        int gameLevel = SceneManager.GetActiveScene().buildIndex; // Get scene index
+
+        if (gameLevel == 0) // Main Menu is the first scene
         {
             levelText.gameObject.SetActive(false); // Don't show level text on menu
             return;
         }
 
-        levelText.text = "Level " + displayedLevel; // Corrected level numbering
+        CancelInvoke(nameof(HideLevelText)); // Restart the hide countdown on every level change
+        levelText.text = "Level " + gameLevel;
         levelText.gameObject.SetActive(true);
         Invoke(nameof(HideLevelText), displayDuration); // Hide after a delay
     }
 
     void HideLevelText()
     {
-        levelText.gameObject.SetActive(false); // Hide text
+        if (levelText != null)
+        {
+            levelText.gameObject.SetActive(false); // Hide text
+        }
     }
 }

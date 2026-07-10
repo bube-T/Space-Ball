@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class EnemyObject : MonoBehaviour
 {
-    private GameObject player; 
+    private GameObject player;
     public float detectionRange = 15f;
     public float moveSpeed = 5f;
     public float followHeight = 2f;
@@ -18,11 +18,18 @@ public class EnemyObject : MonoBehaviour
     void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player"); // Auto-find the player
-        startPosition = transform.position; // Save thr enemy's start position
+        startPosition = transform.position; // Save the enemy's start position
     }
 
     void Update()
     {
+        if (player == null)
+        {
+            // Player may not exist yet (or was destroyed) - try to find it again
+            player = GameObject.FindGameObjectWithTag("Player");
+            if (player == null) return;
+        }
+
         float distance = Vector3.Distance(transform.position, player.transform.position);
 
         switch (currentState)
@@ -71,44 +78,3 @@ public class EnemyObject : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, startPosition, moveSpeed * Time.deltaTime);
     }
 }
-
-
- 
-//     public Transform player; // Reference to the player
-//     public float detectionRange = 10f; // Distance before enemy starts chasing
-//     public float moveSpeed = 3f; // Enemy movement speed
-//     public float followDistance = 3f; // How far behind the player the enemy stays
-
-//     private bool isChasing = false; // Tracks if enemy should follow
-
-//     void Update()
-//     {
-//         float distance = Vector3.Distance(transform.position, player.position); // Get distance to player
-
-//         if (distance < detectionRange)
-//         {
-//             isChasing = true; // Start chasing when player is close enough
-//         }
-
-//         if (isChasing)
-//         {
-//             FollowPlayer(); // Move towards the player but stay behind
-//         }
-
-//         if (distance > detectionRange * 1.5f)
-//         {
-//             isChasing = false; // Stop chasing if player gets too far
-//         }
-//     }
-
-//     void FollowPlayer()
-//     {
-//         Vector3 directionToPlayer = (player.position - transform.position).normalized; // Get direction to player
-//         Vector3 targetPosition = player.position - directionToPlayer * followDistance; // Position behind player
-
-//         transform.position = Vector3.Lerp(transform.position, targetPosition, moveSpeed * Time.deltaTime); // Move smoothly
-//     }
-// }
-
-
-

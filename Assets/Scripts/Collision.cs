@@ -21,20 +21,29 @@ public class CollisionHandler : MonoBehaviour
 
     private void Update()
     {
-        DebugKeysResponse(); // Check for debug key inputs
+        RespondToKeys(); // Check for shortcut key inputs
     }
 
-    // Handles debug key presses for quick level navigation
-    void DebugKeysResponse()
+    // Handles shortcut keys: R restarts the level, Esc returns to the menu, G skips (debug builds only)
+    void RespondToKeys()
     {
-    if (Keyboard.current.gKey.wasPressedThisFrame) // Ensures G key is only detected once per press
-    {
-        loadNextlevel();
-    }
+        if (Keyboard.current == null) return; // No keyboard connected
+
+        if (Keyboard.current.rKey.wasPressedThisFrame)
+        {
+            ReloadLevel(); // Quick restart for the player
+        }
+        else if (Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            SceneManager.LoadScene(0); // Back to the main menu
+        }
+        else if (Debug.isDebugBuild && Keyboard.current.gKey.wasPressedThisFrame)
+        {
+            LoadNextLevel(); // Debug-only level skip
+        }
     }
 
-
-    // Detects collisiom with objects in the game
+    // Detects collision with objects in the game
     private void OnCollisionEnter(Collision other)
     {
         if (hasCollided) return; // Prevent multiple collision triggers
@@ -42,8 +51,7 @@ public class CollisionHandler : MonoBehaviour
         switch (other.gameObject.tag) // Check the tag of the collided object
         {
             case "Friendly":
-                Debug.Log("we good"); // No effect if colliding with friendly objects
-                break;
+                break; // No effect if colliding with friendly objects
             case "Finish":
                 StartSuccess(); // Handle level completion
                 break;
@@ -53,29 +61,38 @@ public class CollisionHandler : MonoBehaviour
         }
     }
 
-    
-
-    // Handles what happens whem the player reaches the finish pad
+    // Handles what happens when the player reaches the finish pad
     void StartSuccess()
     {
-        FindObjectOfType<LevelTimer>(); // Reset the timer for the next level
+        StopLevelTimer(); // Stop the countdown so it can't restart the level mid-celebration
         hasCollided = true; // Prevent further collisions from triggering events
         audioSource.Stop(); // Stop any currently playing audio
         audioSource.PlayOneShot(successSFX); // Play success sound effect
         successParticles.Play(); // Play success particle effect
         GetComponent<Movement>().enabled = false; // Disable movement to prevent unwanted actions
-        Invoke("loadNextlevel", levelLoadDelay); // Load next level after delay
+        Invoke(nameof(LoadNextLevel), levelLoadDelay); // Load next level after delay
     }
 
     // Handles what happens when the player crashes
     void StartCrash()
     {
+        StopLevelTimer(); // Stop the countdown while the crash sequence plays
         hasCollided = true; // Prevent further collisions from triggering events
         audioSource.Stop(); // Stop any currently playing audio
         audioSource.PlayOneShot(crashSFX); // Play crash sound effect
         crashParticles.Play(); // Play crash particle effect
         GetComponent<Movement>().enabled = false; // Disable movement to prevent further input
-        Invoke("ReloadLevel", levelLoadDelay); // Reload level after delay
+        Invoke(nameof(ReloadLevel), levelLoadDelay); // Reload level after delay
+    }
+
+    // Pauses the level countdown timer if one exists in the scene
+    void StopLevelTimer()
+    {
+        LevelTimer timer = FindObjectOfType<LevelTimer>();
+        if (timer != null)
+        {
+            timer.StopTimer();
+        }
     }
 
     // Reloads the current level
@@ -84,18 +101,17 @@ public class CollisionHandler : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex); // Reloads the active scene
     }
 
-    // Loads the next levrl or loops back to the first level if at the last one
-    void loadNextlevel()
+    // Loads the next level or returns to the menu after the last one
+    void LoadNextLevel()
     {
         int currentScene = SceneManager.GetActiveScene().buildIndex;
         int nextScene = currentScene + 1;
 
         if (nextScene == SceneManager.sceneCountInBuildSettings)
         {
-            nextScene = 0; // If it's the last level, restart from level 0
+            nextScene = 0; // Beat the last level: return to the main menu
         }
 
         SceneManager.LoadScene(nextScene); // Load the next scene
     }
 }
-

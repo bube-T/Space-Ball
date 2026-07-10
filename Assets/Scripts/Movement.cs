@@ -27,6 +27,13 @@ public class Movement : MonoBehaviour
         rotation.Enable();
     }
 
+    private void OnDisable()
+    {
+        // Disable input actions when the script is disabled (e.g. after a crash)
+        thrust.Disable();
+        rotation.Disable();
+    }
+
     private void FixedUpdate()
     {
         // Handle movement logic in FixedUpdate for smoother physics
@@ -45,7 +52,7 @@ public class Movement : MonoBehaviour
                 audioSource.PlayOneShot(main);
             }
         }
-        else
+        else if (audioSource.isPlaying)
         {
             audioSource.Stop(); // Stop the sound when thrust is released
         }

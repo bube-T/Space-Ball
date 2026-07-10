@@ -1,26 +1,43 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 public class LevelMenu : MonoBehaviour
 {
-    public GameObject levelsPanel; 
+    public GameObject levelsPanel;
     public int firstLevelIndex = 1; // the first level index as it is in build settings
 
     void Start()
     {
-        levelsPanel.SetActive(false); // Hide level selection at start
+        if (levelsPanel != null)
+        {
+            levelsPanel.SetActive(false); // Hide level selection at start
+        }
+    }
+
+    void Update()
+    {
+        // Escape closes the level selection panel
+        if (levelsPanel != null && levelsPanel.activeSelf &&
+            Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            CloseLevelSelection();
+        }
     }
 
     public void PlayGame()
     {
-        SceneManager.LoadScene(firstLevelIndex); // Load the forst level
+        SceneManager.LoadScene(firstLevelIndex); // Load the first level
     }
 
     public void OpenLevelSelection()
     {
-        levelsPanel.SetActive(true); // Show level selection panel
+        if (levelsPanel != null)
+        {
+            levelsPanel.SetActive(true); // Show level selection panel
+        }
     }
 
     public void LoadSpecificLevel(int levelIndex)
@@ -28,17 +45,19 @@ public class LevelMenu : MonoBehaviour
         SceneManager.LoadScene(levelIndex); // Load the selected level
     }
 
-
     public void CloseLevelSelection()
     {
-        levelsPanel.SetActive(false); // Hide level selection panel
+        if (levelsPanel != null)
+        {
+            levelsPanel.SetActive(false); // Hide level selection panel
+        }
     }
 
     public void QuitGame()
     {
         Application.Quit(); // Quit the application
-        Debug.Log("Game Quit!"); // Debug message for testing
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false; // Also stop play mode in the editor
+#endif
     }
 }
-
-
