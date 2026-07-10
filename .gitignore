@@ -1,0 +1,29 @@
+# ===== Unity generated folders (never commit) =====
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]serSettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# Visual Studio / Rider caches
+.vs/
+.idea/
+ExportedObj/
+.consulo/
+
+# Unity crash reports
+sysinfo.txt
+crashlytics-build.properties
+
+# Builds
+*.apk
+*.aab
+*.unitypackage
+*.app
+
+# Huge source art not needed by the game (GitHub 100MB limit)
+Assets/Wispy Sky/Extras/SphericalRenderPSD.psd
